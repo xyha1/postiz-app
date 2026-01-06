@@ -27,9 +27,10 @@ export const LinkedinContinue: FC<{
       const pages = await call.get('companies');
       return pages;
     } catch (e) {
+      // Close the modal when fetching companies fails to avoid leaving the UI in a broken state
       closeModal();
     }
-  }, []);
+  }, [call, closeModal]);
   const setPage = useCallback(
     (param: { id: string; pageId: string }) => () => {
       setSelectedPage(param);
@@ -51,12 +52,13 @@ export const LinkedinContinue: FC<{
       body: JSON.stringify(page),
     });
     closeModal();
-  }, [integration, page]);
+  }, [closeModal, fetch, integration, page]);
   const filteredData = useMemo(() => {
+    // Avoid showing pages that are already connected to the current launch
     return (
       data?.filter((p: { id: string }) => !existingId.includes(p.id)) || []
     );
-  }, [data]);
+  }, [data, existingId]);
   if (!isLoading && !data?.length) {
     return (
       <div className="text-center flex justify-center items-center text-[18px] leading-[50px] h-[300px]">
@@ -74,7 +76,7 @@ export const LinkedinContinue: FC<{
   }
   return (
     <div className="flex flex-col gap-[20px]">
-      <div>{t('select_linkedin_page', 'Select Linkedin Page:')}</div>
+      <div>{t('select_linkedin_page', 'Select LinkedIn Page:')}</div>
       <div className="grid grid-cols-3 justify-items-center select-none cursor-pointer">
         {filteredData?.map(
           (p: {
